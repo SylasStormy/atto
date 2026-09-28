@@ -16,29 +16,16 @@ type
             varb*: string
             val*: Value
 
-    SpriteValue* = ref object
-        case tp: VType
-        of VTSprite8:
-            val8*: uint8
-        of VTSprite16:
-            val16*: uint16
-        of VTSprite32:
-            val32*: uint32
-        of VTSprite64:
-            val64*: uint64
-        else:
-            discard
-
     ValueType* = enum
         VString, VNumber, VSprite, VRef
     Value* = ref object
-        case tp: ValueType
+        case tp*: ValueType
         of VString:
             value*: string
         of VNumber:
             nvalue*: int16
         of VSprite:
-            svalue*: SpriteValue
+            svalue*: seq[int16]
         of VRef:
             name*: string
 
@@ -59,7 +46,7 @@ func toValue(tk: Token): Value =
     else:
         return Value(tp:VNumber,nvalue:0)
 
-func parse*(code: seq[Token]): seq[Instr] =
+proc parse*(code: seq[Token]): seq[Instr] =
     var parsed: seq[Instr]
 
     var i = 0
@@ -75,5 +62,7 @@ func parse*(code: seq[Token]): seq[Instr] =
         elif first.value == "set" and remaining >= 3 and code[i+1].tp == TIdent:
             parsed.add(Instr(tp:ISet,varb:code[i+1].value,val:toValue(code[i+2])))
             i += 3
+        elif first.value == "label" and remaining >= 2 and code[i+3].tp == TIdent:
+            echo "to be done"
 
     return parsed
